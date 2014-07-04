@@ -11,8 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -42,10 +40,10 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 if (isConnected) {
                     try {
-//                        mOutputStream.write(data.getText().toString().getBytes("UTF-8"));
-                        mObjectOutputStream = new ObjectOutputStream(mOutputStream);
-                        mObjectOutputStream.writeChars(data.getText().toString());
-                        mObjectOutputStream.flush();
+                        mOutputStream.write(data.getText().toString().getBytes("UTF-8"));
+//                        mObjectOutputStream = new ObjectOutputStream(mOutputStream);
+//                        mObjectOutputStream.writeChars(data.getText().toString());
+//                        mObjectOutputStream.flush();
                         Log.w("Data","Sent");
                     } catch (IOException e) {
                         Log.w("OutputStream", e.toString());
