@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.UUID;
@@ -22,9 +23,12 @@ public class MainActivity extends ActionBarActivity {
     BluetoothAdapter mBluetoothAdapter;
     BluetoothServerSocket mmServerSocket;
     BluetoothSocket mBluetoothSocket;
+    ObjectOutputStream mObjectOutputStream;
+    ObjectInputStream mObjectInputStream;
     OutputStream mOutputStream;
     InputStream mInputStream;
-    private String getData = "GET_HR";
+    Database mDatabase;
+    private int GET_HR = 101;
     boolean isBTOpen,isConnected;
     private static final UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -33,6 +37,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mDatabase = new Database();
         isBTOpen = false;
         isConnected = false;
         final EditText data = (EditText)findViewById(R.id.Data);
@@ -51,9 +56,6 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         });
-//        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-//        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-//        startActivity(discoverableIntent);
         sent.setClickable(false);
         AcceptThread();
         new Thread(new Runnable() {
@@ -64,24 +66,52 @@ public class MainActivity extends ActionBarActivity {
                         Log.w("Server", "Waiting to accept");
                         mBluetoothSocket = mmServerSocket.accept();
                         mOutputStream = mBluetoothSocket.getOutputStream();
+                        mInputStream = mBluetoothSocket.getInputStream();
                         Log.w("Server", "Waiting to send data");
                         sent.setClickable(true);
                         isConnected = true;
+                        new Thread(listenForRequest).start();
                     }catch(IOException e) {
                         Log.w("OutputStream",e.toString());
                     }
                 }
             }
         }).start();
-        new Thread(listenForRequest).start();
     }
 
     Runnable listenForRequest = new Runnable() {
         @Override
         public void run() {
+            while(true) {
+                try {
+                    if (mInputStream.available() > 0) {
+                        int[] temp = isGETHR(mInputStream);
+                        if (temp [0] == 1) {
+                            ObjectOutputStream ob = new ObjectOutputStream(mOutputStream);
+                            ob.writeObject(mDatabase.getData(temp[1]));
+                            ob.flush();
+                            Log.w("Server: ","Data sent");
+                        }
+                    }
+                }catch (IOException e){
+                    Log.w("request",e.toString());
+                }catch (ClassNotFoundException e){
 
+                }
+            }
         }
     };
+
+    public int[] isGETHR(InputStream inputStream) throws IOException,ClassNotFoundException{
+        mObjectInputStream = new ObjectInputStream(inputStream);
+        int[] temp = (int [])mObjectInputStream.readObject();
+        if (temp[0] == GET_HR) {
+            Log.w("Server: ","Request received");
+            return new int[]{1,temp[1]};
+        }else {
+            return new int[]{0,0};
+        }
+    }
 
     public void AcceptThread() {
         try {
