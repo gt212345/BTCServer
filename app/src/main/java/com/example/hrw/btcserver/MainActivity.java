@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.UUID;
@@ -22,7 +23,8 @@ public class MainActivity extends ActionBarActivity {
     BluetoothServerSocket mmServerSocket;
     BluetoothSocket mBluetoothSocket;
     OutputStream mOutputStream;
-    ObjectOutputStream mObjectOutputStream;
+    InputStream mInputStream;
+    private String getData = "GET_HR";
     boolean isBTOpen,isConnected;
     private static final UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -41,9 +43,7 @@ public class MainActivity extends ActionBarActivity {
                 if (isConnected) {
                     try {
                         mOutputStream.write(data.getText().toString().getBytes("UTF-8"));
-//                        mObjectOutputStream = new ObjectOutputStream(mOutputStream);
-//                        mObjectOutputStream.writeChars(data.getText().toString());
-//                        mObjectOutputStream.flush();
+                        mOutputStream.flush();
                         Log.w("Data","Sent");
                     } catch (IOException e) {
                         Log.w("OutputStream", e.toString());
@@ -56,24 +56,33 @@ public class MainActivity extends ActionBarActivity {
 //        startActivity(discoverableIntent);
         sent.setClickable(false);
         AcceptThread();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                        if(isBTOpen) {
-                            try {
-                                Log.w("Server", "Waiting to accept");
-                                mBluetoothSocket = mmServerSocket.accept();
-                                mOutputStream = mBluetoothSocket.getOutputStream();
-                                Log.w("Server", "Waiting to send data");
-                                sent.setClickable(true);
-                                isConnected = true;
-                            }catch(IOException e) {
-                                Log.w("OutputStream",e.toString());
-                            }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(isBTOpen) {
+                    try {
+                        Log.w("Server", "Waiting to accept");
+                        mBluetoothSocket = mmServerSocket.accept();
+                        mOutputStream = mBluetoothSocket.getOutputStream();
+                        Log.w("Server", "Waiting to send data");
+                        sent.setClickable(true);
+                        isConnected = true;
+                    }catch(IOException e) {
+                        Log.w("OutputStream",e.toString());
                     }
                 }
-            }).start();
+            }
+        }).start();
+        new Thread(listenForRequest).start();
     }
+
+    Runnable listenForRequest = new Runnable() {
+        @Override
+        public void run() {
+
+        }
+    };
+
     public void AcceptThread() {
         try {
             mmServerSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("BTC", uuid);
