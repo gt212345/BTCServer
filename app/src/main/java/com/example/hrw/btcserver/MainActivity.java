@@ -20,16 +20,16 @@ import java.util.UUID;
 
 
 public class MainActivity extends ActionBarActivity {
-    BluetoothAdapter mBluetoothAdapter;
-    BluetoothServerSocket mmServerSocket;
-    BluetoothSocket mBluetoothSocket;
-    ObjectOutputStream mObjectOutputStream;
-    ObjectInputStream mObjectInputStream;
-    OutputStream mOutputStream;
-    InputStream mInputStream;
-    Database mDatabase;
+    private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothServerSocket mmServerSocket;
+    private BluetoothSocket mBluetoothSocket;
+    private ObjectOutputStream mObjectOutputStream;
+    private ObjectInputStream mObjectInputStream;
+    private OutputStream mOutputStream;
+    private InputStream mInputStream;
+    private Database mDatabase;
     private int GET_HR = 101;
-    boolean isBTOpen,isConnected;
+    private boolean isBTOpen,isConnected;
     private static final UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     @Override
