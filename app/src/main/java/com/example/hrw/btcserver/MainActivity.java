@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -29,7 +30,7 @@ public class MainActivity extends ActionBarActivity {
     private InputStream mInputStream;
     private Database mDatabase;
     private int GET_HR = 101;
-    private boolean isBTOpen,isConnected;
+    private boolean isBTOpen, isConnected;
     private static final UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     @Override
@@ -38,6 +39,23 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mDatabase = new Database();
+        float tempint;
+        String temp = "0000000110010001";
+        tempint = Integer.parseInt(temp.substring(0, 14),2);
+        Log.w("without ." , String.valueOf(tempint));
+        if (Integer.valueOf(temp.substring(14, 15)) == 0) {
+            if (Integer.valueOf(temp.substring(15, 16)) == 0) {
+            } else {
+                tempint += (float) 0.24;
+            }
+        } else {
+            if (Integer.valueOf(temp.substring(15, 16)) == 0) {
+                tempint += (float) 0.49;
+            } else {
+                tempint += (float) 0.99;
+            }
+        }
+        Log.w("14.2", String.valueOf(tempint));
         isBTOpen = false;
         isConnected = false;
         final EditText data = (EditText)findViewById(R.id.Data);
@@ -47,8 +65,13 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 if (isConnected) {
                     try {
-                        mOutputStream.write(data.getText().toString().getBytes("UTF-8"));
-                        mOutputStream.flush();
+                        mObjectOutputStream = new ObjectOutputStream(mOutputStream);
+                        mObjectOutputStream.writeObject(new Byte[]{(byte)0xA5,(byte)0xA5,0x01,0x0F, Byte.parseByte("00010101",2),Byte.parseByte("00010101",2)
+                                ,Byte.parseByte("00010101",2),Byte.parseByte("00010101",2),Byte.parseByte("00010101",2),Byte.parseByte("00010101",2),1,2,3,4,
+                                (byte)1.1,(byte)1.2,(byte)1.3,(byte)1.4,(byte)1.5,(byte)1.6});
+                        mObjectOutputStream.flush();
+//                        mOutputStream.write(data.getText().toString().getBytes("UTF-8"));
+//                        mOutputStream.flush();
                         Log.w("Data","Sent");
                     } catch (IOException e) {
                         Log.w("OutputStream", e.toString());
