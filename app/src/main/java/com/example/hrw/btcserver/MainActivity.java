@@ -58,7 +58,6 @@ public class MainActivity extends ActionBarActivity {
         Log.w("14.2", String.valueOf(tempint));
         isBTOpen = false;
         isConnected = false;
-        final EditText data = (EditText)findViewById(R.id.Data);
         final Button sent = (Button) findViewById(R.id.Sent);
         sent.setOnClickListener(new View.OnClickListener() {
             @Override
